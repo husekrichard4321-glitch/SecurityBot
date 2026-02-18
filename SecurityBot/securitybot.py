@@ -3,6 +3,7 @@ from discord.ext import tasks
 import random
 import os
 from dotenv import load_dotenv
+from discord.ext import commands
 
 # Where is this script on the PC?
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,7 +16,10 @@ CHANNEL_ID = 1424102844969259142
 
 # authorization for bot
 intents = discord.Intents.default()
-client = discord.Client(intents=intents)
+intents.message_content = True
+intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
 
 # reading and filtering file
 
@@ -31,9 +35,9 @@ def load_messages():
 # hourly loop and random message output
 
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=0.5)
 async def hourly_message():
-    channel = client.get_channel(CHANNEL_ID)
+    channel = bot.get_channel(CHANNEL_ID)
     if channel:
         meessages = load_messages()
         await channel.send(random.choice(meessages))
@@ -41,9 +45,9 @@ async def hourly_message():
 # run the boot
 
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f"bot logged in as: {client.user.name}")
+    print(f"bot logged in as: {bot.user.name}")
     hourly_message.start()
 
-client.run(TOKEN)
+bot.run(TOKEN)
